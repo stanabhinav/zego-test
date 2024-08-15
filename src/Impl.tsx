@@ -1,25 +1,20 @@
 /* eslint-disable react-native/no-inline-styles */
 /* eslint-disable react-hooks/exhaustive-deps */
-import {Button, findNodeHandle, StyleSheet, Text, View} from 'react-native';
-import React, {useEffect, useRef, useState} from 'react';
-import {ToggleButton} from './ToggleButton';
-import {profile, roomId, streamId, User} from './constants';
+import React, {useEffect, useState} from 'react';
+import {StyleSheet, Text, View} from 'react-native';
 import ZegoExpressEngine, {
-  ZegoTextureView,
-  ZegoVideoSourceType,
-  ZegoView,
-  ZegoViewMode,
+  ZegoPublishStreamQuality,
 } from 'zego-express-engine-reactnative';
+import {PublishHandler} from './PublishHandler';
+import {StreamHandler} from './StreamHandler';
+import {profile, roomId, User} from './constants';
+
+import {NativeModules} from 'react-native';
+
+const {ForegroundService} = NativeModules;
 
 export function Impl({user}: {user: User}) {
-  const [isScreenSharing, setIsScreenSharing] = useState(false);
-  const [isCameraEnabled, setIsCameraEnabled] = useState(false);
-  const [isPublishing, setIsPublishing] = useState(false);
-  const [isPreviewing, setIsPreviewing] = useState(false);
   const [isJoined, setIsJoined] = useState(false);
-  const [isPlayingStream, setIsPlayingStream] = useState(false);
-
-  const zegoViewRef = useRef<ZegoTextureView>(null);
 
   async function init() {
     await ZegoExpressEngine.createEngineWithProfile(profile);
@@ -33,127 +28,166 @@ export function Impl({user}: {user: User}) {
       },
     );
     setIsJoined(res.errorCode === 0);
+
+    initHandler();
+  }
+
+  function initHandler() {
+    // 以下为常用的房间相关回调
+    ZegoExpressEngine.instance().on(
+      'roomStateUpdate',
+      (roomID, state, errorCode, extendedData) => {
+        console.log(
+          'JS onRoomStateUpdate: ' +
+            state +
+            ' roomID: ' +
+            roomID +
+            ' err: ' +
+            errorCode +
+            ' extendData: ' +
+            extendedData,
+        );
+      },
+    );
+
+    ZegoExpressEngine.instance().on(
+      'IMRecvBroadcastMessage',
+      (roomID, messageList) => {
+        console.log(
+          'JS onIMRecvBroadcastMessage: ' +
+            ' roomID: ' +
+            roomID +
+            ' messageList: ' +
+            messageList,
+        );
+        for (let msg of messageList) {
+          console.log(
+            'current broadcast msg: message: ' +
+              msg.message +
+              ' messageID' +
+              msg.messageID +
+              ' sendTime: ' +
+              msg.sendTime +
+              ' from user :' +
+              msg.fromUser.userID +
+              ' x ' +
+              msg.fromUser.userName,
+          ); // "0", "1", "2",
+        }
+      },
+    );
+
+    ZegoExpressEngine.instance().on(
+      'IMRecvBarrageMessage',
+      (roomID, messageList) => {
+        console.log('JS onIMRecvBarrageMessage: ' + ' roomID: ' + roomID);
+        for (let msg of messageList) {
+          console.log(
+            'current barrage msg: message: ' +
+              msg.message +
+              ' messageID' +
+              msg.messageID +
+              ' sendTime: ' +
+              msg.sendTime +
+              ' from user :' +
+              msg.fromUser.userID +
+              ' x ' +
+              msg.fromUser.userName,
+          ); // "0", "1", "2",
+        }
+      },
+    );
+
+    ZegoExpressEngine.instance().on(
+      'IMRecvCustomCommand',
+      (roomID, fromUser, command) => {
+        console.log(
+          'JS onIMRecvCustomCommand: ' +
+            ' roomID: ' +
+            roomID +
+            ' from user: ' +
+            fromUser.userID +
+            ' x ' +
+            fromUser.userName +
+            ' command: ' +
+            command,
+        );
+      },
+    );
+
+    ZegoExpressEngine.instance().on(
+      'publisherStateUpdate',
+      (streamID, state, errorCode, extendedData) => {
+        console.log(
+          'JS onPublisherStateUpdate: ' +
+            state +
+            ' streamID: ' +
+            streamID +
+            ' err: ' +
+            errorCode +
+            ' extendData: ' +
+            extendedData,
+        );
+      },
+    );
+
+    ZegoExpressEngine.instance().on(
+      'playerStateUpdate',
+      (streamID, state, errorCode, extendedData) => {
+        console.log(
+          'JS onPlayerStateUpdate: ' +
+            state +
+            ' streamID: ' +
+            streamID +
+            ' err: ' +
+            errorCode +
+            ' extendData: ' +
+            extendedData,
+        );
+      },
+    );
+
+    ZegoExpressEngine.instance().on(
+      'publisherQualityUpdate',
+      (streamID: string, quality: ZegoPublishStreamQuality) => {
+        console.log(
+          'JS publisherQualityUpdate: streamID: ' +
+            streamID +
+            ' ,videoCaptureFPS: ' +
+            quality.videoCaptureFPS +
+            ' videoKBPS: ' +
+            quality.videoKBPS,
+        );
+      },
+    );
   }
 
   useEffect(() => {
     init();
+    ForegroundService.startService();
     return () => {
+      ForegroundService.stopService();
       ZegoExpressEngine.destroyEngine();
     };
   }, []);
 
-  async function enableScreenShare() {
-    await ZegoExpressEngine.instance().startScreenCapture({
-      captureVideo: true,
-      captureAudio: false,
-      applicationVolume: 100,
-      microphoneVolume: 100,
-    });
-    await ZegoExpressEngine.instance().setVideoSource(
-      ZegoVideoSourceType.ScreenCapture,
-      undefined,
-    );
-    setIsScreenSharing(true);
-
-    await ZegoExpressEngine.instance().startPublishingStream(
-      streamId,
-      undefined,
-      {
-        forceSynchronousNetworkTime: 0,
-      },
-    );
-    setIsPublishing(true);
-  }
-
-  async function startCamera() {
-    await ZegoExpressEngine.instance().enableCamera(true, undefined);
-    setIsCameraEnabled(true);
-    await ZegoExpressEngine.instance().startPublishingStream(
-      streamId,
-      undefined,
-      {
-        forceSynchronousNetworkTime: 0,
-      },
-    );
-    setIsPublishing(true);
-  }
-
-  async function startPreview() {
-    let zegoView: ZegoView = {
-      reactTag: findNodeHandle(zegoViewRef.current)!,
-      viewMode: 0,
-      backgroundColor: 0,
-    };
-
-    ZegoExpressEngine.instance().startPreview(zegoView, undefined);
-    setIsPreviewing(true);
-  }
-
-  async function startPlayingStream() {
-    let zegoView: ZegoView = {
-      reactTag: findNodeHandle(zegoViewRef.current)!,
-      viewMode: ZegoViewMode.AspectFill,
-      backgroundColor: 0,
-    };
-
-    ZegoExpressEngine.instance().startPlayingStream(
-      streamId,
-      zegoView,
-      undefined,
-    );
-    setIsPlayingStream(true);
-  }
-
   return (
     <View style={{flex: 1, gap: 16}}>
-      <View style={{flexDirection: 'row', justifyContent: 'space-between'}}>
-        <Text style={styels.text}>
-          {isJoined ? 'room joined' : 'Not Joined'}
-        </Text>
-        <Text style={styels.text}>
-          Publish state:{' '}
-          <Text style={{fontWeight: 'bold'}}>
-            {isPublishing ? 'on' : 'off'}
-          </Text>
-        </Text>
-      </View>
-
-      <ToggleButton
-        state={isScreenSharing}
-        enable={enableScreenShare}
-        title="Screen Share"
-      />
-      <ToggleButton
-        state={isCameraEnabled}
-        enable={startCamera}
-        title="Camera"
-      />
-      <ToggleButton
-        state={isPreviewing}
-        enable={startPreview}
-        title="Previewing"
-      />
-      <ToggleButton
-        state={isPlayingStream}
-        enable={startPlayingStream}
-        title="play stream"
-      />
-
-      <View style={styels.textureView}>
-        <ZegoTextureView ref={zegoViewRef} />
-      </View>
+      <Text style={styels.text}>{isJoined ? 'room joined' : 'Not Joined'}</Text>
+      <Line />
+      <PublishHandler />
+      <Line />
+      <StreamHandler />
     </View>
   );
 }
 
+const Line = () => {
+  return <View style={{height: 1, width: '100%', backgroundColor: 'black'}} />;
+};
+
 const styels = StyleSheet.create({
   text: {
     color: 'black',
-  },
-  textureView: {
-    width: 100,
-    height: 100,
-    marginTop: 16,
-    backgroundColor: 'darkgreen',
   },
 });
