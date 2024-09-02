@@ -1,15 +1,8 @@
-import {useEffect, useState} from 'react';
-import {Impl} from './Impl';
-import {u1, u2, User} from './constants';
-import {
-  Button,
-  PermissionsAndroid,
-  Platform,
-  StyleSheet,
-  Text,
-  View,
-} from 'react-native';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { PermissionsAndroid, Platform, StyleSheet, Text, View, Button } from 'react-native';
+import { check, request, PERMISSIONS, RESULTS } from 'react-native-permissions';
+import { Impl } from './Impl';
+import { u1, u2, User } from './constants';
 
 export default function Demo() {
   const [user, setUser] = useState<User>();
@@ -18,47 +11,52 @@ export default function Demo() {
 
   useEffect(() => {
     const requestPermissions = async () => {
-      if (Platform.OS === 'android') {
-        try {
+      try {
+        if (Platform.OS === 'android') {
           const granted = await PermissionsAndroid.requestMultiple([
             PermissionsAndroid.PERMISSIONS.CAMERA,
             PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
           ]);
 
           const cameraGranted =
-            granted[PermissionsAndroid.PERMISSIONS.CAMERA] ===
-            PermissionsAndroid.RESULTS.GRANTED;
+            granted[PermissionsAndroid.PERMISSIONS.CAMERA] === PermissionsAndroid.RESULTS.GRANTED;
           const audioGranted =
-            granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] ===
-            PermissionsAndroid.RESULTS.GRANTED;
+            granted[PermissionsAndroid.PERMISSIONS.RECORD_AUDIO] === PermissionsAndroid.RESULTS.GRANTED;
 
           setCameraGranted(cameraGranted);
           setAudioGranted(audioGranted);
-        } catch (err) {
-          console.warn(err);
+        } else if (Platform.OS === 'ios') {
+          const cameraStatus = await request(PERMISSIONS.IOS.CAMERA);
+          const audioStatus = await request(PERMISSIONS.IOS.MICROPHONE);
+
+          setCameraGranted(cameraStatus === RESULTS.GRANTED);
+          setAudioGranted(audioStatus === RESULTS.GRANTED);
         }
+      } catch (err) {
+        console.warn(err);
+      }
+    };
+
+    const checkPermissions = async () => {
+      try {
+        if (Platform.OS === 'android') {
+          const cameraGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.CAMERA);
+          const audioGranted = await PermissionsAndroid.check(PermissionsAndroid.PERMISSIONS.RECORD_AUDIO);
+          setCameraGranted(cameraGranted);
+          setAudioGranted(audioGranted);
+        } else if (Platform.OS === 'ios') {
+          const cameraStatus = await check(PERMISSIONS.IOS.CAMERA);
+          const audioStatus = await check(PERMISSIONS.IOS.MICROPHONE);
+
+          setCameraGranted(cameraStatus === RESULTS.GRANTED);
+          setAudioGranted(audioStatus === RESULTS.GRANTED);
+        }
+      } catch (err) {
+        console.warn(err);
       }
     };
 
     requestPermissions();
-
-    const checkPermissions = async () => {
-      if (Platform.OS === 'android') {
-        try {
-          const cameraGranted = await PermissionsAndroid.check(
-            PermissionsAndroid.PERMISSIONS.CAMERA,
-          );
-          const audioGranted = await PermissionsAndroid.check(
-            PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
-          );
-          setCameraGranted(cameraGranted);
-          setAudioGranted(audioGranted);
-        } catch (err) {
-          console.warn(err);
-        }
-      }
-    };
-
     checkPermissions();
   }, []);
 
@@ -67,34 +65,27 @@ export default function Demo() {
       <View style={style.warning}>
         <Text style={style.info}>
           Camera Permission:{' '}
-          <Text style={{fontWeight: 'bold'}}>
-            {cameraGranted ? 'granted' : 'denied'}
-          </Text>
+          <Text style={{ fontWeight: 'bold' }}>{cameraGranted ? 'granted' : 'denied'}</Text>
         </Text>
         <Text style={style.info}>
           Audio Permission:{' '}
-          <Text style={{fontWeight: 'bold'}}>
-            {audioGranted ? 'granted' : 'denied'}
-          </Text>
+          <Text style={{ fontWeight: 'bold' }}>{audioGranted ? 'granted' : 'denied'}</Text>
         </Text>
-
-        <Text style={[style.info, {marginTop: 16}]}>
-          Please grant all the Permission in settings
-        </Text>
+        <Text style={[style.info, { marginTop: 16 }]}>Please grant all the permissions in settings</Text>
       </View>
     );
   }
 
   return (
-    <View style={{flex: 1, padding: 16, gap: 16, backgroundColor: 'white'}}>
+    <View style={{ flex: 1, padding: 16, gap: 16, backgroundColor: 'white', marginTop: 160 }}>
       {user ? (
         <>
-          <Button title="reset user" onPress={() => setUser(undefined)} />
+          <Button title="Reset User" onPress={() => setUser(undefined)} />
         </>
       ) : (
-        <View style={{flexDirection: 'row', gap: 16}}>
-          <Button title="set user 1" onPress={() => setUser(u1)} />
-          <Button title="set user 2" onPress={() => setUser(u2)} />
+        <View style={{ flexDirection: 'row', gap: 16 }}>
+          <Button title="Set User 1" onPress={() => setUser(u1)} />
+          <Button title="Set User 2" onPress={() => setUser(u2)} />
         </View>
       )}
       {user && (
