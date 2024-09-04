@@ -1,11 +1,12 @@
-import React, {RefObject, useRef, useState} from 'react';
-import {ToggleButton} from './ToggleButton';
+import React, { RefObject, useRef, useState } from 'react';
+import { ToggleButton } from './ToggleButton';
 import ZegoExpressEngine, {
+  ZegoSurfaceView,
   ZegoTextureView,
   ZegoView,
 } from 'zego-express-engine-reactnative';
-import {findNodeHandle} from 'react-native';
-import {micStreamId, screenStreamId} from './constants';
+import { findNodeHandle } from 'react-native';
+import { micStreamId, screenStreamId } from './constants';
 
 const getZegoView = (viewRef: RefObject<ZegoTextureView>): ZegoView => ({
   reactTag: findNodeHandle(viewRef.current)!,
@@ -50,8 +51,8 @@ export const StreamHandler = () => {
         enable={playAudioStream}
         title={'Stream Mic Audio'}
       />
-      <ZegoTextureView style={{height: 100}} ref={screenShareView} />
-      <ZegoTextureView ref={audioStreamView} />
+      <ZegoSurfaceView style={{ height: 100 }} ref={screenShareView} />
+      <ZegoSurfaceView ref={audioStreamView} />
     </>
   );
 };
