@@ -944,9 +944,9 @@ PODS:
   - React-Mapbuffer (0.73.8):
     - glog
     - React-debug
-  - react-native-zego-express-engine (3.16.0):
+  - react-native-zego-express-engine (3.16.3):
     - React
-    - ZegoExpressEngine (= 3.16.0)
+    - ZegoExpressPrivate (= 3.16.2.40464)
   - React-nativeconfig (0.73.8)
   - React-NativeModulesApple (0.73.8):
     - glog
@@ -1118,7 +1118,9 @@ PODS:
     - React-Core
   - SocketRocket (0.6.1)
   - Yoga (1.14.0)
-  - ZegoExpressEngine (3.16.0)
+  - ZegoExpressPrivate (3.16.2.40464):
+    - ZegoExpressPrivate/Default (= 3.16.2.40464)
+  - ZegoExpressPrivate/Default (3.16.2.40464)
 
 DEPENDENCIES:
   - boost (from `../node_modules/react-native/third-party-podspecs/boost.podspec`)
@@ -1212,7 +1214,7 @@ SPEC REPOS:
     - libevent
     - OpenSSL-Universal
     - SocketRocket
-    - ZegoExpressEngine
+    - ZegoExpressPrivate
 
 EXTERNAL SOURCES:
   boost:
@@ -1357,7 +1359,7 @@ SPEC CHECKSUMS:
   React-jsinspector: 1729acf5ffe2d4439d698da25fddf0c75d07d1a1
   React-logger: 60afd40b183e8e6642bfd0108f1a1ad360cc665e
   React-Mapbuffer: 672a9342eb75a4d0663306e94d4dfc88aee73b93
-  react-native-zego-express-engine: ceb73287b63dbcb3a2cc6ad08732d087a8143825
+  react-native-zego-express-engine: 2c8ac699a4b723bd9ec2afd5c01baf05a38d8288
   React-nativeconfig: 2e44d0d2dd222b12a5183f4bcaa4a91881497acb
   React-NativeModulesApple: 8aa032fe6c92c1a3c63e4809d42816284a56a9b0
   React-perflogger: f9367428cf475f4606b5965c1d5a71781bb95299
@@ -1381,7 +1383,7 @@ SPEC CHECKSUMS:
   RNPermissions: 54e6c10e20d46b1f92a0551e412179e902fd89b4
   SocketRocket: f32cd54efbe0f095c4d7594881e52619cfe80b17
   Yoga: 2a16e58450c48e110211dae1159fb114bbcdcfc0
-  ZegoExpressEngine: 7af4f60b95c8e8085a9bbcd870cfe9281c580005
+  ZegoExpressPrivate: 6c6a9f8ed287b03156bf6910d4851f71eab1eee5
 
 PODFILE CHECKSUM: 6c4ad57cae91be62495001ed036cc846951630c3
 

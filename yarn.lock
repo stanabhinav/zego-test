@@ -6739,7 +6739,7 @@ yocto-queue@^0.1.0:
   resolved "https://registry.npmjs.org/yocto-queue/-/yocto-queue-0.1.0.tgz"
   integrity sha512-rVksvsnNCdJ/ohGc6xgPwyN8eheCxsiLM8mxuE/t/mOVqJewPuO1miLpTHQiRgTKCLexL4MeAFVagts7HmNZ2Q==
 
-zego-express-engine-reactnative@3.16.0:
-  version "3.16.0"
-  resolved "https://registry.npmjs.org/zego-express-engine-reactnative/-/zego-express-engine-reactnative-3.16.0.tgz"
-  integrity sha512-iSuRlyW/1aFkhqds8+GYfD23PbqsVIKTbhl5nMdzr0kEr8P00LIs4xuYCG1y9M3bDVAhMQHWMO4+/80wAOttVA==
+zego-express-engine-reactnative@3.16.3:
+  version "3.16.3"
+  resolved "https://registry.npmjs.org/zego-express-engine-reactnative/-/zego-express-engine-reactnative-3.16.3.tgz"
+  integrity sha512-1UqtBLpJNlh0TzjWr07NSOGSh5IgKYejb8r+VW3w08YvS0YgIdJzlVD6hdctGdiuJ+dV+LyuskJ6nQLT76EX7w==
